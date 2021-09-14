@@ -3,16 +3,17 @@ package com.serglife.shoppinglist.data.repository
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.serglife.shoppinglist.data.entity.ShopItem
+import kotlin.random.Random
 
 object ShopListRepositoryImpl: ShopListRepository {
 
     private val shopListLD = MutableLiveData<List<ShopItem>>()
-    private val shopList = mutableListOf<ShopItem>()
+    private val shopList = sortedSetOf<ShopItem>({ o1, o2 -> o1.id.compareTo(o2.id) })
     private var autoIncrementId = 0
 
     init {
-        for (i in 0 until 10){
-            val item = ShopItem(name = "name $i", count = i, enable = true)
+        for (i in 0 until 500){
+            val item = ShopItem(name = "name $i", count = i, enable = Random.nextBoolean())
             addShopItem(item)
         }
     }

@@ -1,4 +1,4 @@
-package com.serglife.shoppinglist.ui
+package com.serglife.shoppinglist.ui.main
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
