@@ -1,20 +1,27 @@
 package com.serglife.shoppinglist.ui.main
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentContainerView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.serglife.shoppinglist.R
 import com.serglife.shoppinglist.ui.shopItem.ShopItemActivity
+import com.serglife.shoppinglist.ui.shopItem.ShopItemFragment
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedListener {
     private lateinit var viewModel: MainViewModel
     private lateinit var adapter: ShopListAdapter
+    private var shopItemContainer: FragmentContainerView? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        shopItemContainer = findViewById(R.id.shop_item_container)
 
         setupRecyclerView()
 
@@ -25,9 +32,31 @@ class MainActivity : AppCompatActivity() {
 
         val buttonAddItem = findViewById<FloatingActionButton>(R.id.button_add_shop_item)
         buttonAddItem.setOnClickListener {
-            val intent = ShopItemActivity.newIntentAddItem(this)
-            startActivity(intent)
+            if(isOnePaneMode()) {
+                val intent = ShopItemActivity.newIntentAddItem(this)
+                startActivity(intent)
+            }else{
+                launchFragment(ShopItemFragment.newInstanceAddItem())
+            }
         }
+    }
+
+    override fun onEditingFinished() {
+        Toast.makeText(this@MainActivity, "Success", Toast.LENGTH_LONG).show()
+        supportFragmentManager.popBackStack()
+    }
+
+    private fun isOnePaneMode(): Boolean{
+        return shopItemContainer == null
+    }
+
+    private fun launchFragment(fragment: Fragment){
+        supportFragmentManager.popBackStack()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.shop_item_container, fragment)
+            .addToBackStack(null)
+            .commit()
+
     }
 
     private fun setupRecyclerView() {
@@ -72,9 +101,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupClickListener() {
         adapter.onShopItemClickListener = {
-            val id = it.id
-            val intent = ShopItemActivity.newIntentEditItem(this, id)
-            startActivity(intent)
+            if(isOnePaneMode()){
+                val intent = ShopItemActivity.newIntentEditItem(this, it.id)
+                startActivity(intent)
+            }else{
+                launchFragment(ShopItemFragment.newInstanceEditItem(it.id))
+            }
+
         }
     }
 
