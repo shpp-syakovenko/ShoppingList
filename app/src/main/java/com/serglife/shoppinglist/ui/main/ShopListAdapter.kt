@@ -2,9 +2,13 @@ package com.serglife.shoppinglist.ui.main
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
 import androidx.recyclerview.widget.ListAdapter
 import com.serglife.shoppinglist.R
 import com.serglife.shoppinglist.data.entity.ShopItem
+import com.serglife.shoppinglist.databinding.ItemShopDisabledBinding
+import com.serglife.shoppinglist.databinding.ItemShopEnableBinding
 
 class ShopListAdapter : ListAdapter<ShopItem, ShopListViewHolder>(ShopItemDiffCallback()) {
 
@@ -19,21 +23,35 @@ class ShopListAdapter : ListAdapter<ShopItem, ShopListViewHolder>(ShopItemDiffCa
             else -> throw RuntimeException("Unknown layout $viewType")
         }
 
-        val view = LayoutInflater.from(parent.context).inflate(layout, parent, false)
-        return ShopListViewHolder(view)
+        val binding = DataBindingUtil.inflate<ViewDataBinding>(
+            LayoutInflater.from(parent.context),
+            layout,
+            parent,
+            false
+        )
+        return ShopListViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ShopListViewHolder, position: Int) {
         val shopItem = getItem(position)
-        holder.tvName.text = "${shopItem.name}"
-        holder.tvCount.text = shopItem.count.toString()
-        holder.view.setOnLongClickListener {
+        val binding = holder.binding
+
+        binding.root.setOnLongClickListener {
             onShopItemLongClickListener?.invoke(shopItem)
             true
         }
-        holder.view.setOnClickListener {
+        binding.root.setOnClickListener {
             onShopItemClickListener?.invoke(shopItem)
             true
+        }
+
+        when(binding){
+            is ItemShopDisabledBinding -> {
+                binding.shopItem = shopItem
+            }
+            is ItemShopEnableBinding -> {
+                binding.shopItem = shopItem
+            }
         }
     }
 
